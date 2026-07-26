@@ -1,4 +1,4 @@
-/* ==================== 全局重置 ==================== */
+/* 全局重置 */
 * {
     margin: 0;
     padding: 0;
@@ -17,7 +17,7 @@ body {
     margin: 0 auto;
 }
 
-/* ==================== 头部 ==================== */
+/* 头部 */
 .header {
     background: linear-gradient(135deg, #1a73e8, #0d47a1);
     color: white;
@@ -55,7 +55,7 @@ body {
     font-size: 18px;
 }
 
-/* ==================== 控制区域 ==================== */
+/* 控制区域 */
 .control-section {
     margin-bottom: 25px;
 }
@@ -70,25 +70,6 @@ body {
     align-items: center;
     flex-wrap: wrap;
     gap: 15px;
-}
-
-.control-info {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.user-list-label {
-    font-weight: 600;
-    color: #333;
-    font-size: 14px;
-}
-
-.user-list-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
 }
 
 .user-tag {
@@ -124,7 +105,7 @@ body {
     color: #1a73e8;
 }
 
-/* ==================== 进度条 ==================== */
+/* 进度条 */
 .progress-bar {
     width: 100%;
     margin-top: 12px;
@@ -159,66 +140,7 @@ body {
     white-space: nowrap;
 }
 
-/* ==================== 上传区域 ==================== */
-.upload-area {
-    background: white;
-    border: 2px dashed #d0d7de;
-    border-radius: 12px;
-    padding: 30px 20px;
-    text-align: center;
-    margin-top: 15px;
-    transition: all 0.3s;
-    cursor: pointer;
-}
-
-.upload-area:hover {
-    border-color: #1a73e8;
-    background: #f8faff;
-}
-
-.upload-area.dragover {
-    border-color: #1a73e8;
-    background: #e8f0fe;
-}
-
-.upload-area .icon {
-    font-size: 36px;
-    margin-bottom: 8px;
-}
-
-.upload-area h3 {
-    color: #555;
-    margin-bottom: 4px;
-    font-size: 16px;
-}
-
-.upload-area p {
-    color: #888;
-    font-size: 13px;
-}
-
-.upload-area input[type="file"] {
-    display: none;
-}
-
-.upload-btn {
-    display: inline-block;
-    background: #1a73e8;
-    color: white;
-    padding: 8px 24px;
-    border-radius: 8px;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: background 0.2s;
-}
-
-.upload-btn:hover {
-    background: #1557b0;
-}
-
-/* ==================== 工具栏 ==================== */
+/* 工具栏 */
 .toolbar {
     background: white;
     padding: 15px 20px;
@@ -321,7 +243,7 @@ body {
     background: #d33426;
 }
 
-/* ==================== 排序区域 ==================== */
+/* 排序区域 */
 .sort-section {
     background: white;
     padding: 12px 20px;
@@ -362,7 +284,7 @@ body {
     margin: 0 4px;
 }
 
-/* ==================== 用户卡片 ==================== */
+/* 用户卡片 */
 .user-card {
     background: white;
     border-radius: 12px;
@@ -426,7 +348,7 @@ body {
     font-size: 16px;
 }
 
-/* ==================== 表格 ==================== */
+/* 表格 */
 .table-wrapper {
     overflow-x: auto;
 }
@@ -474,7 +396,7 @@ tr:hover {
     text-decoration: underline;
 }
 
-/* ==================== 徽章和标签 ==================== */
+/* 徽章和标签 */
 .rating-badge {
     display: inline-block;
     padding: 2px 12px;
@@ -532,7 +454,7 @@ tr:hover {
     color: #0c5460;
 }
 
-/* ==================== 状态样式 ==================== */
+/* 状态样式 */
 .hidden {
     display: none !important;
 }
@@ -555,7 +477,7 @@ tr:hover {
     margin-bottom: 8px;
 }
 
-/* ==================== 加载动画 ==================== */
+/* 加载动画 */
 .loading {
     text-align: center;
     padding: 40px;
@@ -579,7 +501,7 @@ tr:hover {
     }
 }
 
-/* ==================== 响应式设计 ==================== */
+/* 响应式设计 */
 @media (max-width: 768px) {
     body {
         padding: 12px;
