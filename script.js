@@ -361,7 +361,7 @@ function getRatingClass(rating) {
     if (rating <= 1599) return 'rating-1200-1599';
     if (rating <= 1999) return 'rating-1600-1999';
     if (rating <= 2399) return 'rating-2000-2399';
-    return 'rating-2400-2999';
+    return 'rating-2400-3500';
 }
 
 function createEmptyState(icon, title, description) {
