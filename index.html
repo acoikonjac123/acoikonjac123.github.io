@@ -10,28 +10,21 @@
     <div class="container">
         <!-- 头部 -->
         <div class="header">
-            <h1>📊 Codeforces 提交记录查看器</h1>
+            <h1>Codeforces 提交记录抓取工具</h1>
             <p>自动抓取预定义用户列表的 AC 提交记录</p>
             <div class="stats-row" id="headerStats">
-                <div class="stat-box">👥 用户: <strong id="totalUsers">0</strong></div>
-                <div class="stat-box">✅ 提交: <strong id="totalSubmissions">0</strong></div>
-                <div class="stat-box">📚 题目: <strong id="totalProblems">0</strong></div>
+                <div class="stat-box">用户: <strong id="totalUsers">0</strong></div>
+                <div class="stat-box">提交: <strong id="totalSubmissions">0</strong></div>
+                <div class="stat-box">题目: <strong id="totalProblems">0</strong></div>
             </div>
         </div>
 
         <!-- 控制区域 -->
-        <div class="control-section" id="controlSection">
+        <div class="control-section">
             <div class="control-card">
-                <div class="control-info">
-                    <span class="user-list-label">📋 监控用户列表：</span>
-                    <span id="userListDisplay" class="user-list-tags"></span>
-                </div>
                 <div class="control-actions">
                     <button class="btn btn-primary" onclick="fetchFromAPI()" id="fetchBtn">
                         🚀 抓取数据
-                    </button>
-                    <button class="btn btn-outline" onclick="loadSampleData()">
-                        📂 加载示例
                     </button>
                     <span class="status-text" id="statusText">就绪</span>
                 </div>
@@ -42,23 +35,10 @@
                     <span class="progress-text" id="progressText"></span>
                 </div>
             </div>
-
-            <!-- 上传区域 -->
-            <div class="upload-area" id="uploadArea">
-                <div class="icon">📁</div>
-                <h3>或上传 JSON 文件</h3>
-                <p>支持从脚本导出的 codeforces_submissions.json 文件</p>
-                <input type="file" id="fileInput" accept=".json">
-                <br>
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                    📤 选择文件
-                </button>
-            </div>
         </div>
 
         <!-- 数据展示 -->
         <div id="dataContainer" class="hidden">
-            <!-- 工具栏 -->
             <div class="toolbar">
                 <div class="left">
                     <input type="text" id="searchInput" placeholder="🔍 搜索题目或用户...">
@@ -75,21 +55,20 @@
                         <option value="unknown">未定级</option>
                     </select>
                     <div class="tag-filter-group">
-                        <input type="text" id="tagInput" placeholder="🏷️ 输入标签筛选 (用逗号分隔)" style="min-width:200px;">
+                        <input type="text" id="tagInput" placeholder="🏷️ 标签筛选 (逗号分隔)" style="min-width:200px;">
                         <button class="btn btn-outline" onclick="applyTagFilter()" style="padding:8px 14px;">筛选</button>
                         <button class="btn btn-outline" onclick="clearTagFilter()" style="padding:8px 14px;">清除</button>
                     </div>
                 </div>
                 <div class="right">
-                    <button class="btn btn-success" onclick="exportToCSV()">📊 导出 CSV</button>
-                    <button class="btn btn-primary" onclick="exportToMarkdown()">📝 导出 MD</button>
-                    <button class="btn btn-primary" onclick="exportToJSON()">💾 导出 JSON</button>
-                    <button class="btn btn-outline" onclick="toggleAllUsers()">👁️ 展开/折叠</button>
-                    <button class="btn btn-danger" onclick="clearData()">🗑️ 清除</button>
+                    <button class="btn btn-success" onclick="exportToCSV()">导出 CSV</button>
+                    <button class="btn btn-primary" onclick="exportToMarkdown()">导出 MD</button>
+                    <button class="btn btn-primary" onclick="exportToJSON()">导出 JSON</button>
+                    <button class="btn btn-outline" onclick="toggleAllUsers()">展开/折叠</button>
+                    <button class="btn btn-danger" onclick="clearData()">清除</button>
                 </div>
             </div>
 
-            <!-- 排序选项 -->
             <div class="sort-section">
                 <span style="font-weight:500;color:#555;">排序方式：</span>
                 <select id="sortOrder" onchange="applyFilters()">
@@ -102,25 +81,21 @@
                 </span>
             </div>
 
-            <!-- 数据展示区域 -->
             <div id="dataDisplay"></div>
         </div>
 
-        <!-- 空状态 -->
         <div id="emptyState" class="empty-state">
             <div class="icon">📂</div>
             <h3>暂无数据</h3>
             <p>点击 "抓取数据" 按钮获取提交记录</p>
         </div>
 
-        <!-- 加载状态 -->
         <div id="loadingState" class="loading hidden">
             <div class="spinner"></div>
             <p id="loadingText">正在加载数据...</p>
         </div>
     </div>
 
-    <!-- 引入 JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
