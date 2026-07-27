@@ -22,6 +22,7 @@ const USER_LIST = [
     'WBX0513',
     'Zdy402',
     'yzzqcl2025'
+    'Zim_o'
 ];
 
 // 全局状态
