@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codeforces 提交记录查看器</title>
+    <title>Codeforces 提交记录抓取工具</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="./icon.png">
 </head>
 <body>
     <div class="container">
@@ -45,15 +46,12 @@
                     <select id="filterUser">
                         <option value="">所有用户</option>
                     </select>
-                    <select id="filterRating">
-                        <option value="">所有难度</option>
-                        <option value="800-1199">800-1199</option>
-                        <option value="1200-1599">1200-1599</option>
-                        <option value="1600-1999">1600-1999</option>
-                        <option value="2000-2399">2000-2399</option>
-                        <option value="2400-2999">2400-2999</option>
-                        <option value="unknown">未定级</option>
-                    </select>
+                    <!-- 难度筛选 -->
+                    <div class="tag-filter-group">
+                        <input type="text" id="filterRating" placeholder="🏷️ 难度 (如 800, 1200-1500, >=2000)" style="min-width:270px;">
+                        <button class="btn btn-outline" onclick="applyRatingFilter()" style="padding:8px 14px;">筛选</button>
+                        <button class="btn btn-outline" onclick="clearRatingFilter()" style="padding:8px 14px;">清除</button>
+                    </div>
                     <div class="tag-filter-group">
                         <input type="text" id="tagInput" placeholder="🏷️ 标签筛选 (逗号分隔)" style="min-width:200px;">
                         <button class="btn btn-outline" onclick="applyTagFilter()" style="padding:8px 14px;">筛选</button>
@@ -95,7 +93,6 @@
             <p id="loadingText">正在加载数据...</p>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
