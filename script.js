@@ -29,10 +29,11 @@ const USER_LIST = [
 const state = {
     data: null,
     isFetching: false,
-    tagFilters: []
+    tagFilters: [],
+    ratingFilters: []
 };
 
-//  DOM 引用
+// DOM 引用
 const DOM = {
     userListDisplay: document.getElementById('userListDisplay'),
     fetchBtn: document.getElementById('fetchBtn'),
@@ -60,7 +61,7 @@ const DOM = {
 function init() {
     renderUserTags();
     setupEventListeners();
-    console.log('📊 Codeforces 提交记录查看器已加载');
+    console.log('📊 Codeforces 提交记录抓取工具');
     console.log(`📋 监控用户 (${USER_LIST.length} 个): ${USER_LIST.join(', ')}`);
     setTimeout(fetchFromAPI, 500);
 }
@@ -74,10 +75,13 @@ function renderUserTags() {
 
 // 事件监听
 function setupEventListeners() {
-    // 搜索和过滤
     DOM.searchInput.addEventListener('input', applyFilters);
     DOM.filterUser.addEventListener('change', applyFilters);
-    DOM.filterRating.addEventListener('change', applyFilters);
+    DOM.filterRating.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            applyRatingFilter();
+        }
+    });
     DOM.sortOrder.addEventListener('change', applyFilters);
     DOM.tagInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
@@ -100,6 +104,23 @@ function applyTagFilter() {
 function clearTagFilter() {
     DOM.tagInput.value = '';
     state.tagFilters = [];
+    applyFilters();
+}
+
+// 难度标签筛选
+function applyRatingFilter() {
+    const input = DOM.filterRating.value.trim();
+    if (input) {
+        state.ratingFilters = input.split(',').map(r => r.trim()).filter(r => r);
+    } else {
+        state.ratingFilters = [];
+    }
+    applyFilters();
+}
+
+function clearRatingFilter() {
+    DOM.filterRating.value = '';
+    state.ratingFilters = [];
     applyFilters();
 }
 
@@ -129,7 +150,6 @@ async function fetchFromAPI() {
             if (submissions.length > 0) {
                 results[handle] = submissions;
             }
-            
             completed++;
             if (completed < total) {
                 await sleep(1200);
@@ -168,30 +188,115 @@ async function fetchUserSubmissions(handle) {
             console.warn(`用户 ${handle}: ${data.comment || '未知错误'}`);
             return [];
         }
+        
+        const problemMap = new Map();
 
-        const acSubmissions = data.result
+        data.result
             .filter(sub => sub.verdict === 'OK')
-            .map(sub => ({
-                problemId: `${sub.problem.contestId}${sub.problem.index}`,
-                problemName: sub.problem.name,
-                contestId: sub.problem.contestId,
-                problemIndex: sub.problem.index,
-                rating: sub.problem.rating || null,
-                tags: sub.problem.tags || [],
-                submissionId: sub.id,
-                language: sub.programmingLanguage,
-                submissionTime: new Date(sub.creationTimeSeconds * 1000).toISOString(),
-                codeUrl: `https://codeforces.com/contest/${sub.problem.contestId}/submission/${sub.id}`,
-                problemUrl: `https://codeforces.com/problemset/problem/${sub.problem.contestId}/${sub.problem.index}`
-            }));
+            .forEach(sub => {
+                const problemId = `${sub.problem.contestId}${sub.problem.index}`;
+                
+                if (!problemMap.has(problemId)) {
+                    problemMap.set(problemId, {
+                        problemId: problemId,
+                        problemName: sub.problem.name,
+                        contestId: sub.problem.contestId,
+                        problemIndex: sub.problem.index,
+                        rating: sub.problem.rating || null,
+                        tags: sub.problem.tags || [],
+                        submissionId: sub.id,
+                        language: sub.programmingLanguage,
+                        submissionTime: new Date(sub.creationTimeSeconds * 1000).toISOString(),
+                        codeUrl: `https://codeforces.com/contest/${sub.problem.contestId}/submission/${sub.id}`,
+                        problemUrl: `https://codeforces.com/problemset/problem/${sub.problem.contestId}/${sub.problem.index}`
+                    });
+                }
+            });
 
-        console.log(`✅ ${handle}: ${acSubmissions.length} 条 AC 记录`);
+        const acSubmissions = Array.from(problemMap.values());
+        console.log(`${handle}: ${acSubmissions.length} 条 AC 记录`);
         return acSubmissions;
 
     } catch (error) {
-        console.error(`❌ ${handle}: 请求失败`, error);
+        console.error(`${handle}: 请求失败`, error);
         return [];
     }
+}
+
+// 解析单个难度筛选条件
+function parseRatingFilter(filter) {
+    filter = filter.trim();
+    if (!filter) return null;
+
+    // 范围
+    const rangeMatch = filter.match(/^(\d+)\s*-\s*(\d+)$/);
+    if (rangeMatch) {
+        const min = parseInt(rangeMatch[1]);
+        const max = parseInt(rangeMatch[2]);
+        return { type: 'range', min: Math.min(min, max), max: Math.max(min, max) };
+    }
+
+    // >= 或 ≥
+    const gteMatch = filter.match(/^>=?\s*(\d+)$/);
+    if (gteMatch) {
+        return { type: 'gte', value: parseInt(gteMatch[1]) };
+    }
+
+    // <= 或 ≤
+    const lteMatch = filter.match(/^<=?\s*(\d+)$/);
+    if (lteMatch) {
+        return { type: 'lte', value: parseInt(lteMatch[1]) };
+    }
+
+    // 精确
+    const exactMatch = filter.match(/^(\d+)$/);
+    if (exactMatch) {
+        return { type: 'exact', value: parseInt(exactMatch[1]) };
+    }
+
+    return null;
+}
+
+// 检查难度是否匹配任一筛选条件
+function matchesRating(rating, parsedFilters) {
+    return parsedFilters.some(f => {
+        switch (f.type) {
+            case 'exact': return rating === f.value;
+            case 'range': return rating >= f.min && rating <= f.max;
+            case 'gte':   return rating >= f.value;
+            case 'lte':   return rating <= f.value;
+            default:      return false;
+        }
+    });
+}
+
+// 检查提交是否匹配所有筛选条件
+function matchesFilters(submission, searchTerm, ratingFilters, tagFilters) {
+    // 搜索过滤
+    if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        const matchesSearch = 
+            submission.problemName?.toLowerCase().includes(term) ||
+            submission.problemId?.toLowerCase().includes(term) ||
+            (submission.tags || []).some(t => t.toLowerCase().includes(term));
+        if (!matchesSearch) return false;
+    }
+
+    // 难度过滤
+    if (ratingFilters.length > 0) {
+        const parsedFilters = ratingFilters.map(parseRatingFilter).filter(f => f !== null);
+        if (parsedFilters.length > 0) {
+            if (!submission.rating || !matchesRating(submission.rating, parsedFilters)) return false;
+        }
+    }
+
+    // 标签过滤
+    if (tagFilters.length > 0) {
+        const subTags = (submission.tags || []).map(t => t.toLowerCase());
+        if (!tagFilters.every(tag => subTags.some(st => st.includes(tag)))) return false;
+    }
+
+    return true;
 }
 
 // 核心过滤和排序
@@ -203,52 +308,31 @@ function applyFilters() {
 
     const searchTerm = DOM.searchInput.value;
     const filterUser = DOM.filterUser.value;
-    const filterRating = DOM.filterRating.value;
     const sortOrder = DOM.sortOrder.value;
     const tagFilters = state.tagFilters;
+    const ratingFilters = state.ratingFilters;
 
     let filteredData = {};
 
-    // 获取用户列表
     let users = Object.keys(state.data);
-    // 按用户过滤
     if (filterUser) {
         users = users.filter(u => u === filterUser);
     }
-    // 对每个用户的数据进行过滤
+
     for (const handle of users) {
-        let submissions = state.data[handle] || [];
-        // 搜索过滤
-        if (searchTerm) {
-            const term = searchTerm.toLowerCase();
-            submissions = submissions.filter(s =>
-                s.problemName?.toLowerCase().includes(term) ||
-                s.problemId?.toLowerCase().includes(term) ||
-                (s.tags || []).some(t => t.toLowerCase().includes(term))
-            );
-        }
-        // 难度过滤
-        if (filterRating) {
-            if (filterRating === 'unknown') {
-                submissions = submissions.filter(s => !s.rating);
-            } else {
-                const [min, max] = filterRating.split('-').map(Number);
-                submissions = submissions.filter(s => s.rating && s.rating >= min && s.rating <= max);
-            }
-        }
-        // 标签过滤
-        if (tagFilters.length > 0) {
-            submissions = submissions.filter(s => {
-                const subTags = (s.tags || []).map(t => t.toLowerCase());
-                return tagFilters.every(tag => subTags.some(st => st.includes(tag)));
-            });
-        }
-        if (submissions.length > 0) {
-            filteredData[handle] = submissions;
+        const submissions = state.data[handle] || [];
+        
+        // 过滤符合条件的提交
+        const filteredSubmissions = submissions.filter(sub => 
+            matchesFilters(sub, searchTerm, ratingFilters, tagFilters)
+        );
+        
+        if (filteredSubmissions.length > 0) {
+            filteredData[handle] = filteredSubmissions;
         }
     }
 
-    // 对用户进行排序
+    // 对用户进行排序（基于过滤后的提交数量）
     const sortedUsers = Object.keys(filteredData).sort((a, b) => {
         const countA = filteredData[a].length;
         const countB = filteredData[b].length;
@@ -256,19 +340,17 @@ function applyFilters() {
             return countA - countB;
         } else if (sortOrder === 'desc') {
             return countB - countA;
-        } else { // 'name'
+        } else {
             return a.localeCompare(b);
         }
     });
 
-    // 重建排序后的数据
     const sortedData = {};
     for (const handle of sortedUsers) {
         sortedData[handle] = filteredData[handle];
     }
-    // 更新过滤信息
+    
     updateFilterInfo(sortedData);
-    // 渲染
     renderData(sortedData);
 }
 
@@ -293,21 +375,25 @@ function createUserCard(handle, submissions, rank) {
     const card = document.createElement('div');
     card.className = 'user-card';
 
+    // 统计信息基于筛选后的数据
     const stats = calculateStats(submissions);
     const topTags = stats.topTags.slice(0, 3);
 
     card.innerHTML = `
         <div class="user-header">
             <div class="user-info">
-                <span class="user-name">👤 ${handle}</span>
+                <span class="user-name">${handle}</span>
                 <span class="user-rank">#${rank}</span>
                 <span style="color:#666;font-size:14px;">${submissions.length} 道 AC</span>
+                ${state.ratingFilters.length > 0 || state.tagFilters.length > 0 ? 
+                    `<span style="color:#1a73e8;font-size:12px;background:#e8f0fe;padding:2px 10px;border-radius:10px;">已筛选</span>` : 
+                    ''}
             </div>
             <div class="user-stats">
                 <span>平均难度: <strong>${stats.avgRating}</strong></span>
                 <span>语言: <strong>${stats.languageCount}</strong> 种</span>
                 ${topTags.length > 0 ? `<span>🏷️ ${topTags.map(([tag, count]) => `${tag}(${count})`).join(', ')}</span>` : ''}
-                <button class="btn btn-outline" onclick="toggleUser(this)" style="padding:4px 12px;font-size:12px;">收起</button>
+                <button class="btn btn-outline" onclick="window.toggleUser(this)" style="padding:4px 12px;font-size:12px;">收起</button>
             </div>
         </div>
         <div class="table-wrapper user-content">
@@ -324,20 +410,24 @@ function createUserCard(handle, submissions, rank) {
                     </tr>
                 </thead>
                 <tbody>
-                    ${submissions.map((sub, idx) => `
+                    ${submissions.map((sub, idx) => {
+                        // 检查难度是否匹配筛选条件
+                        const parsedRatingFilters = (state.ratingFilters || []).map(parseRatingFilter).filter(f => f !== null);
+                        const isRatingHighlighted = parsedRatingFilters.length > 0 && sub.rating && matchesRating(sub.rating, parsedRatingFilters);
+                        return `
                         <tr>
                             <td>${idx + 1}</td>
                             <td><a href="${sub.problemUrl || sub.codeUrl || '#'}" target="_blank" class="problem-link">${sub.problemId || 'N/A'}</a></td>
                             <td>${sub.problemName || 'N/A'}</td>
-                            <td><span class="rating-badge ${getRatingClass(sub.rating)}">${sub.rating || 'N/A'}</span></td>
+                            <td><span class="tag ${isRatingHighlighted ? 'tag-highlight' : ''}">${sub.rating || 'N/A'}</span></td>
                             <td><span class="language-tag">${sub.language || 'N/A'}</span></td>
-                            <td>${sub.submissionTime ? sub.submissionTime.slice(0, 16) : 'N/A'}</td>
+                            <td>${sub.submissionTime ? sub.submissionTime.slice(0, 10) : 'N/A'}</td>
                             <td>${(sub.tags || []).map(t => {
                                 const isHighlighted = state.tagFilters.some(filter => t.toLowerCase().includes(filter));
                                 return `<span class="tag ${isHighlighted ? 'tag-highlight' : ''}">${t}</span>`;
                             }).join('')}</td>
                         </tr>
-                    `).join('')}
+                    `}).join('')}
                 </tbody>
             </table>
         </div>
@@ -354,15 +444,6 @@ function calculateStats(submissions) {
     tags.forEach(t => { tagCount[t] = (tagCount[t] || 0) + 1; });
     const topTags = Object.entries(tagCount).sort((a, b) => b[1] - a[1]);
     return { avgRating, languageCount: languages.size, topTags };
-}
-
-function getRatingClass(rating) {
-    if (!rating) return 'rating-unknown';
-    if (rating <= 1199) return 'rating-800-1199';
-    if (rating <= 1599) return 'rating-1200-1599';
-    if (rating <= 1999) return 'rating-1600-1999';
-    if (rating <= 2399) return 'rating-2000-2399';
-    return 'rating-2400-3500';
 }
 
 function createEmptyState(icon, title, description) {
@@ -409,6 +490,9 @@ function updateFilterInfo(data) {
     let info = `显示 ${userCount} 个用户，${totalSubs} 条记录`;
     if (state.tagFilters.length > 0) {
         info += `，标签筛选: ${state.tagFilters.map(t => `<span class="filter-tag-badge">${t}</span>`).join(' ')}`;
+    }
+    if (state.ratingFilters.length > 0) {
+        info += `，难度筛选: ${state.ratingFilters.map(r => `<span class="filter-tag-badge">${r}</span>`).join(' ')}`;
     }
     DOM.filterInfo.innerHTML = info;
 }
@@ -489,10 +573,11 @@ function clearData() {
     }
     state.data = null;
     state.tagFilters = [];
+    state.ratingFilters = [];
     DOM.tagInput.value = '';
+    DOM.filterRating.value = '';
     DOM.searchInput.value = '';
     DOM.filterUser.value = '';
-    DOM.filterRating.value = '';
     DOM.dataDisplay.innerHTML = '';
     showDataContainer(false);
     updateUI({});
@@ -500,7 +585,7 @@ function clearData() {
     DOM.filterInfo.textContent = '显示所有用户';
 }
 
-// 导出功能
+// 导出
 function exportToJSON() {
     if (!state.data) {
         alert('没有数据可导出');
@@ -527,7 +612,7 @@ function exportToCSV() {
                 `"${(sub.problemName || '').replace(/"/g, '""')}"`,
                 sub.rating || 'N/A',
                 `"${(sub.language || '').replace(/"/g, '""')}"`,
-                sub.submissionTime ? sub.submissionTime.slice(0, 16) : '',
+                sub.submissionTime ? sub.submissionTime.slice(0, 10) : '',
                 `"${tags}"`,
                 sub.problemUrl || sub.codeUrl || ''
             ].join(','));
@@ -554,7 +639,7 @@ function exportToMarkdown() {
         md += '|---|--------|---------|------|------|----------|\n';
         const display = submissions.slice(0, 50);
         display.forEach((sub, idx) => {
-            md += `| ${idx+1} | ${sub.problemId || ''} | ${sub.problemName || ''} | ${sub.rating || 'N/A'} | ${sub.language || ''} | ${sub.submissionTime ? sub.submissionTime.slice(0,16) : ''} |\n`;
+            md += `| ${idx+1} | ${sub.problemId || ''} | ${sub.problemName || ''} | ${sub.rating || 'N/A'} | ${sub.language || ''} | ${sub.submissionTime ? sub.submissionTime.slice(0, 10) : ''} |\n`;
         });
         if (submissions.length > 50) {
             md += `\n*... 还有 ${submissions.length - 50} 条记录*\n`;
@@ -575,5 +660,18 @@ function downloadFile(content, filename, mimeType) {
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
 }
+
+// 暴露函数到全局作用域
+window.fetchFromAPI = fetchFromAPI;
+window.applyTagFilter = applyTagFilter;
+window.clearTagFilter = clearTagFilter;
+window.applyRatingFilter = applyRatingFilter;
+window.clearRatingFilter = clearRatingFilter;
+window.exportToJSON = exportToJSON;
+window.exportToCSV = exportToCSV;
+window.exportToMarkdown = exportToMarkdown;
+window.toggleAllUsers = toggleAllUsers;
+window.clearData = clearData;
+window.toggleUser = toggleUser;
 
 init();
