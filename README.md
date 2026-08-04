@@ -28,7 +28,7 @@ Or click to download the zip file
 |1.1.0|26.7.31|Added rating filter|
 |1.1.1|26.8.2|Fixed the bug of duplicate submissions|
 
-**Version**: v1.0.2
+**Version**: v1.1.1
 
 **Last updated**: Augest 26, 2026
 
@@ -64,7 +64,7 @@ Or click to download the zip file
 |1.1.0|26.7.31|添加了难度分筛选功能|
 |1.1.1|26.8.2|修复了重复提交的 bug|
 
-**版本**：v1.0.2
+**版本**：v1.1.1
 
 **最后更新**：2026 年 8 月 4 日
 
