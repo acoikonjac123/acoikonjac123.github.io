@@ -25,10 +25,12 @@ Or click to download the zip file
 |1.0|26.7.25|Release this project|
 |1.0.1|26.7.26|Add a CF username|
 |1.0.2|26.7.27|Fix a bug|
+|1.1.0|26.7.31|Added rating filter|
+|1.1.1|26.8.2|Fixed the bug of duplicate submissions|
 
 **Version**: v1.0.2
 
-**Last updated**: July 26, 2026
+**Last updated**: Augest 26, 2026
 
 **Open source license**: MIT License
 
@@ -59,9 +61,11 @@ Or click to download the zip file
 |1.0|26.7.25|发布此项目|
 |1.0.1|26.7.26|添加一个 CF 用户名|
 |1.0.2|26.7.27|修复一个 bug|
+|1.1.0|26.7.31|添加了难度分筛选功能|
+|1.1.1|26.8.2|修复了重复提交的 bug|
 
 **版本**：v1.0.2
 
-**最后更新**：2026年7月27日
+**最后更新**：2026 年 8 月 4 日
 
 **开源许可**：MIT 许可协议
