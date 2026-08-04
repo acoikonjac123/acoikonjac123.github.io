@@ -1,6 +1,6 @@
 # Codeforces Submissions Fetch Tool
 
-This project is a tool designed to retrieve submission records from Codeforces, utilizing an HTML+JS+CSS framework.
+This project is a tool designed to retrieve submission records from Codeforces, utilizing an HTML + AJAX framework.
 
 ## Download
 
@@ -36,7 +36,7 @@ Or click to download the zip file
 
 # Codeforces 提交记录获取工具
 
-本项目是一个工具，旨在利用 HTML+JS+CSS 框架从 Codeforces 检索提交记录。
+本项目是一个工具，旨在利用 HTML + AJAX 框架从 Codeforces 检索提交记录。
 
 ## 下载
 
