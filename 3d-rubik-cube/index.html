@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 三阶魔方 - 竞速计时版</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="info">
+        <h3>🎮 操作说明</h3>
+        <p><strong>Alt + R:</strong> 自动打乱</p>
+        <p><strong>Space:</strong> 开始/停止计时</p>
+        <p><strong>鼠标拖拽:</strong> 360°旋转视角</p>
+        <hr>
+        <p><strong>面旋转:</strong> r/l/u/d/f/b (顺), 大写(逆)</p>
+        <p><strong>中层:</strong> m/e/s (顺), M/E/S (逆)</p>
+        <p><strong>转体:</strong> x/y/z (顺), X/Y/Z (逆)</p>
+    </div>
+
+    <div id="timer-panel">
+        <div id="current-time">00:00.00</div>
+        <div id="status-text">按 Alt+R 打乱</div>
+        <div id="scramble-box">
+            <span>打乱公式:</span>
+            <div id="scramble-text">-</div>
+        </div>
+        <div id="stats">
+            <div class="stat-item"><span>Best:</span> <b id="stat-best">-</b></div>
+            <div class="stat-item"><span>Ao5:</span> <b id="stat-ao5">-</b></div>
+            <div class="stat-item"><span>Ao12:</span> <b id="stat-ao12">-</b></div>
+            <div class="stat-item"><span>Count:</span> <b id="stat-count">0</b></div>
+        </div>
+        <div id="export-btns">
+            <button id="btn-json">导出 JSON</button>
+            <button id="btn-csv">导出 CSV</button>
+            <button id="btn-clear" class="danger">清空记录</button>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
